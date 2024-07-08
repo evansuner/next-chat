@@ -1,8 +1,9 @@
 FROM node:18-alpine AS base
-
+# 设置 Alpine 镜像源为清华大学镜像
+ENV ALPINE_MIRROR=https://mirror.tuna.tsinghua.edu.cn/alpine/latest-stable
 FROM base AS deps
 
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache --repository $ALPINE_MIRROR/main --repository $ALPINE_MIRROR/community libc6-compat
 
 WORKDIR /app
 
@@ -13,7 +14,7 @@ RUN yarn install
 
 FROM base AS builder
 
-RUN apk update && apk add --no-cache git
+RUN apk update && apk add --no-cache --repository $ALPINE_MIRROR/main --repository $ALPINE_MIRROR/community git
 
 ENV OPENAI_API_KEY=""
 ENV GOOGLE_API_KEY=""
@@ -28,7 +29,7 @@ RUN yarn build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk add proxychains-ng
+RUN apk add --no-cache --repository $ALPINE_MIRROR/main --repository $ALPINE_MIRROR/community proxychains-ng
 
 ENV PROXY_URL=""
 ENV OPENAI_API_KEY=""
